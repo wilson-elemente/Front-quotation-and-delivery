@@ -15,6 +15,7 @@ export default function LoginPage() {
         try {
             const response = await login(data.email, data.password);
             localStorage.setItem('token', response.token);
+            alert('Login successful!');
             navigate('/dashboard');
         } catch (error) {
             console.error('Login failed:', error);
