@@ -20,10 +20,9 @@ export default function LoginPage() {
             setError('');
             const response = await login(data.email, data.password);
             localStorage.setItem('token', response.token);
-            authLogin(); // Actualizar el contexto de autenticación
+            authLogin();
             navigate('/dashboard');
         } catch (error) {
-            console.error('Login failed:', error);
             setError('Credenciales inválidas. Verifique su correo y contraseña.');
         }
     };

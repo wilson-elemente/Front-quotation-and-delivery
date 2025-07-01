@@ -81,11 +81,9 @@ export default function QuotePage() {
     const onSubmit = async (data: FormData) => {
         try {
             const res: QuoteResponseDTO = await getQuote(data);
-            const priceSoles = res.priceCents
             setQuote(res);
-            alert(`Precio de la cotización:= ${priceSoles} Pesos Colombianos`);
+            alert(`Precio de la cotización: ${res.priceCents} Pesos Colombianos`);
         } catch (err) {
-            console.error(err);
             alert('Error al obtener la cotización');
         }
     };
@@ -93,7 +91,7 @@ export default function QuotePage() {
     const handleConfirmShipment = async () => {
         if (!quote) return;
 
-        const formValues = getValues(); // 
+        const formValues = getValues();
 
         const payload: RegisterShipmentDTO = {
             ...formValues,
@@ -102,9 +100,7 @@ export default function QuotePage() {
         try {
             const response = await registerShipment(payload);
             alert(`Envío registrado con ID: ${response.id}`);
-            // Aquí podrías redirigir o limpiar el formulario
         } catch (error) {
-            console.error(error);
             alert('Error al registrar el envío');
         }
     };
@@ -116,14 +112,12 @@ export default function QuotePage() {
             </Typography>
 
             <Paper sx={{ p: 4, mb: 4, backgroundColor: '#fafafa' }}>
-                {/* Formulario de cotización */}
                 <Box component="form" onSubmit={handleSubmit(onSubmit)}>
                     <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', mb: 3 }}>
                         📦 Información del paquete
                     </Typography>
                     
                     <Grid container spacing={3}>
-                        {/* Origen y Destino */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 label="🗺️ Ciudad de origen"
@@ -147,7 +141,6 @@ export default function QuotePage() {
                             />
                         </Grid>
 
-                        {/* Peso */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 label="⚖️ Peso (kg)"
@@ -162,7 +155,6 @@ export default function QuotePage() {
                             />
                         </Grid>
 
-                        {/* Dimensiones */}
                         <Grid item xs={12} sm={2}>
                             <TextField
                                 label="📏 Largo (cm)"
@@ -203,7 +195,6 @@ export default function QuotePage() {
                             />
                         </Grid>
 
-                        {/* Botón de cotizar */}
                         <Grid item xs={12}>
                             <Button
                                 type="submit"
@@ -222,7 +213,6 @@ export default function QuotePage() {
                     </Grid>
                 </Box>
 
-                {/* Resultado de la cotización */}
                 {quote && (
                     <Box sx={{ mt: 4 }}>
                         <Divider sx={{ mb: 3 }} />

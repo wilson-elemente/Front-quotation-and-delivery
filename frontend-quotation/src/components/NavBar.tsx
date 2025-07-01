@@ -19,7 +19,6 @@ function NavBar() {
         </Typography>
         
         {isAuthenticated ? (
-          // Usuario autenticado
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button 
               color="inherit" 
@@ -59,7 +58,6 @@ function NavBar() {
             </Button>
           </Box>
         ) : (
-          // Usuario no autenticado
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button 
               color="inherit" 

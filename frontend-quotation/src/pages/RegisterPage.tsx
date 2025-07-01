@@ -22,7 +22,6 @@ export default function RegisterPage() {
       navigate('/');
     } catch (error) {
       setError('Error al registrar. El usuario ya existe o la conexión falló.');
-      console.error(error);
     }
   };
 

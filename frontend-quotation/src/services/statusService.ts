@@ -9,7 +9,6 @@ export async function getShipmentStatusHistory(id: string) {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log('Shipment status history response:', response.data);
-  return response.data; 
+  return response.data;
 }
 

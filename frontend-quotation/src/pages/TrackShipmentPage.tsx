@@ -36,16 +36,12 @@ export default function TrackShipmentPage() {
     useEffect(() => {
         if (!shipmentId) return;
 
-        // Cerrar conexión previa si existe
         socketRef.current?.disconnect();
-
-        // Conectar nuevo socket con el shipmentId
         const socket = io('http://localhost:3000', {
             query: { shipmentId },
         });
 
         socket.on('statusUpdate', (data: { status: string }) => {
-            console.log('Estado actualizado por WebSocket:', data.status);
             setStatusHistory((prev) => {
                 if (!Array.isArray(prev)) return [data.status];
                 return prev.includes(data.status) ? prev : [...prev, data.status];
@@ -69,21 +65,14 @@ export default function TrackShipmentPage() {
             setHasQueried(true);
 
             const response = await getShipmentStatusHistory(shipmentId);
-            console.log('Respuesta del servicio:', response);
             
-            // Extraer currentStatus del objeto de respuesta
             const currentState = response.currentStatus || response.status || null;
             const history = response.statusHistory || response.history || (Array.isArray(response) ? response : []);
             
             setStatusHistory(Array.isArray(history) ? history : []);
             setCurrentStatus(currentState);
-            setShipmentData(response); // Guardamos todos los datos del envío
-            
-            console.log('Buscando estado para ID:', shipmentId);
-            console.log('Estado actual extraído:', currentState);
-            console.log('Datos del envío:', response);
+            setShipmentData(response);
         } catch (err) {
-            console.error(err);
             setError('No se pudo obtener el estado del envío');
         }
     };
@@ -95,7 +84,6 @@ export default function TrackShipmentPage() {
             </Typography>
 
             <Paper sx={{ p: 4, mb: 4, backgroundColor: '#fafafa' }}>
-                {/* Formulario de consulta */}
                 <Box component="form" onSubmit={(e) => { e.preventDefault(); handleTrack(); }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
@@ -125,7 +113,6 @@ export default function TrackShipmentPage() {
                     </Grid>
                 </Box>
 
-                {/* Información del envío */}
                 {shipmentData && (
                     <Box sx={{ mt: 4 }}>
                         <Divider sx={{ mb: 3 }} />
@@ -200,7 +187,6 @@ export default function TrackShipmentPage() {
                     </Box>
                 )}
 
-                {/* Estado actual y Stepper */}
                 {hasQueried && (
                     <Box sx={{ mt: 3 }}>
                         <Alert severity="info" sx={{ mb: 3 }}>
@@ -232,7 +218,6 @@ export default function TrackShipmentPage() {
                     </Box>
                 )}
 
-                {/* Historial de estados */}
                 {statusHistory.length > 0 && (
                     <Box sx={{ mt: 4 }}>
                         <Divider sx={{ mb: 2 }} />
@@ -256,7 +241,6 @@ export default function TrackShipmentPage() {
                     </Box>
                 )}
 
-                {/* Error */}
                 {error && (
                     <Alert severity="error" sx={{ mt: 3 }}>
                         ❌ {error}
