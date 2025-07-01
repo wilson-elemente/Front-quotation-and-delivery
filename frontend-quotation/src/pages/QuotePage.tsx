@@ -3,7 +3,12 @@ import {
     Button,
     Container,
     Typography,
-
+    Paper,
+    Box,
+    Card,
+    CardContent,
+    Divider,
+    Alert,
 } from '@mui/material';
 import { useState } from 'react';
 import { registerShipment } from '../services/shipmentService';
@@ -76,11 +81,9 @@ export default function QuotePage() {
     const onSubmit = async (data: FormData) => {
         try {
             const res: QuoteResponseDTO = await getQuote(data);
-            const priceSoles = res.priceCents
             setQuote(res);
-            alert(`Precio de la cotización:= ${priceSoles} Pesos Colombianos`);
+            alert(`Precio de la cotización: ${res.priceCents} Pesos Colombianos`);
         } catch (err) {
-            console.error(err);
             alert('Error al obtener la cotización');
         }
     };
@@ -88,7 +91,7 @@ export default function QuotePage() {
     const handleConfirmShipment = async () => {
         if (!quote) return;
 
-        const formValues = getValues(); // 
+        const formValues = getValues();
 
         const payload: RegisterShipmentDTO = {
             ...formValues,
@@ -97,107 +100,168 @@ export default function QuotePage() {
         try {
             const response = await registerShipment(payload);
             alert(`Envío registrado con ID: ${response.id}`);
-            // Aquí podrías redirigir o limpiar el formulario
         } catch (error) {
-            console.error(error);
             alert('Error al registrar el envío');
         }
     };
 
     return (
-        <Container maxWidth="sm">
-            <Typography variant="h4" gutterBottom>
-                Cotizar envío
+        <Container maxWidth="md" sx={{ mt: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom>
+                💰 Cotizar envío
             </Typography>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid size={12}>
-                        <TextField
-                            label="Origen"
-                            fullWidth
-                            {...register('origin')}
-                            error={!!errors.origin}
-                            helperText={errors.origin?.message}
-                        />
+
+            <Paper sx={{ p: 4, mb: 4, backgroundColor: '#fafafa' }}>
+                <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+                    <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', mb: 3 }}>
+                        📦 Información del paquete
+                    </Typography>
+                    
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="🗺️ Ciudad de origen"
+                                fullWidth
+                                variant="outlined"
+                                sx={{ backgroundColor: 'white' }}
+                                {...register('origin')}
+                                error={!!errors.origin}
+                                helperText={errors.origin?.message}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="🎯 Ciudad de destino"
+                                fullWidth
+                                variant="outlined"
+                                sx={{ backgroundColor: 'white' }}
+                                {...register('destination')}
+                                error={!!errors.destination}
+                                helperText={errors.destination?.message}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="⚖️ Peso (kg)"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                sx={{ backgroundColor: 'white' }}
+                                inputProps={{ step: "any", min: "0.1" }}
+                                {...register('weightKg', { valueAsNumber: true })}
+                                error={!!errors.weightKg}
+                                helperText={errors.weightKg?.message}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} sm={2}>
+                            <TextField
+                                label="📏 Largo (cm)"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                sx={{ backgroundColor: 'white' }}
+                                inputProps={{ min: "1" }}
+                                {...register('lengthCm', { valueAsNumber: true })}
+                                error={!!errors.lengthCm}
+                                helperText={errors.lengthCm?.message}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={2}>
+                            <TextField
+                                label="📐 Ancho (cm)"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                sx={{ backgroundColor: 'white' }}
+                                inputProps={{ min: "1" }}
+                                {...register('widthCm', { valueAsNumber: true })}
+                                error={!!errors.widthCm}
+                                helperText={errors.widthCm?.message}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={2}>
+                            <TextField
+                                label="📊 Alto (cm)"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                sx={{ backgroundColor: 'white' }}
+                                inputProps={{ min: "1" }}
+                                {...register('heightCm', { valueAsNumber: true })}
+                                error={!!errors.heightCm}
+                                helperText={errors.heightCm?.message}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                fullWidth
+                                sx={{ 
+                                    py: 1.5,
+                                    backgroundColor: '#1976d2',
+                                    '&:hover': { backgroundColor: '#1565c0' },
+                                    fontSize: '1.1rem'
+                                }}
+                            >
+                                🔍 Obtener cotización
+                            </Button>
+                        </Grid>
                     </Grid>
-
-                    <Grid size={12}>
-                        <TextField
-                            label="Destino"
-                            fullWidth
-                            {...register('destination')}
-                            error={!!errors.destination}
-                            helperText={errors.destination?.message}
-                        />
-                    </Grid>
-
-                    <Grid size={12}>
-                        <TextField
-                            label="Peso (kg)"
-                            type="number"
-                            fullWidth
-                            inputProps={{ step: "any" }}
-                            {...register('weightKg', { valueAsNumber: true })}
-                            error={!!errors.weightKg}
-                            helperText={errors.weightKg?.message}
-                        />
-                    </Grid>
-
-                    <Grid size={12}>
-                        <TextField
-                            label="Largo (cm)"
-                            type="number"
-                            fullWidth
-                            {...register('lengthCm', { valueAsNumber: true })}
-                            error={!!errors.lengthCm}
-                            helperText={errors.lengthCm?.message}
-                        />
-                    </Grid>
-
-                    <Grid size={12}>
-                        <TextField
-                            label="Ancho (cm)"
-                            type="number"
-                            fullWidth
-                            {...register('widthCm', { valueAsNumber: true })}
-                            error={!!errors.widthCm}
-                            helperText={errors.widthCm?.message}
-                        />
-                    </Grid>
-
-                    <Grid size={12}>
-                        <TextField
-                            label="Alto (cm)"
-                            type="number"
-                            fullWidth
-                            {...register('heightCm', { valueAsNumber: true })}
-                            error={!!errors.heightCm}
-                            helperText={errors.heightCm?.message}
-                        />
-                    </Grid>
-                </Grid>
-
-
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    sx={{ mt: 3 }}
-                >
-                    Siguiente
-                </Button>
+                </Box>
 
                 {quote && (
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        sx={{ mt: 2, ml: 2 }}
-                        onClick={handleConfirmShipment}
-                    >
-                        Confirmar envío
-                    </Button>
+                    <Box sx={{ mt: 4 }}>
+                        <Divider sx={{ mb: 3 }} />
+                        <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
+                            💰 Resultado de la cotización
+                        </Typography>
+                        
+                        <Card sx={{ mb: 3, backgroundColor: 'white', boxShadow: 2 }}>
+                            <CardContent>
+                                <Grid container spacing={2} alignItems="center">
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Precio total estimado
+                                        </Typography>
+                                        <Typography variant="h4" fontWeight="bold" color="success.main">
+                                            💵 ${quote.priceCents.toLocaleString()} COP
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                                            Peso facturable calculado
+                                        </Typography>
+                                        <Typography variant="h6">
+                                            📦 {quote.chargeableWeight} kg
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
+
+
+                        <Button
+                            variant="contained"
+                            color="success"
+                            fullWidth
+                            size="large"
+                            onClick={handleConfirmShipment}
+                            sx={{ 
+                                py: 1.5,
+                                fontSize: '1.1rem',
+                                backgroundColor: '#4caf50',
+                                '&:hover': { backgroundColor: '#45a049' }
+                            }}
+                        >
+                            ✅ Confirmar y registrar envío
+                        </Button>
+                    </Box>
                 )}
-            </form>
+            </Paper>
         </Container>
     );
 }
