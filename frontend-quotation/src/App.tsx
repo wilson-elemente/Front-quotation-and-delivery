@@ -4,6 +4,8 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import QuotePage from './pages/QuotePage';
 import type { JSX } from 'react';
+import TrackShipmentPage from './pages/TrackShipmentPage';
+
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem('token');
@@ -29,6 +31,15 @@ function App() {
           element={
             <PrivateRoute>
               <QuotePage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/track"
+          element={
+            <PrivateRoute>
+              <TrackShipmentPage />
             </PrivateRoute>
           }
         />
