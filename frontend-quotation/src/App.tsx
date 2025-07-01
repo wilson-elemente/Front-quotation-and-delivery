@@ -5,6 +5,8 @@ import DashboardPage from './pages/DashboardPage';
 import QuotePage from './pages/QuotePage';
 import type { JSX } from 'react';
 import TrackShipmentPage from './pages/TrackShipmentPage';
+import NavBar from './components/NavBar';
+import { AuthProvider } from './contexts/AuthContext';
 
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
@@ -14,37 +16,40 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <DashboardPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/quote"
-          element={
-            <PrivateRoute>
-              <QuotePage />
-            </PrivateRoute>
-          }
-        />
+    <AuthProvider>
+      <Router>
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <DashboardPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/quote"
+            element={
+              <PrivateRoute>
+                <QuotePage />
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="/track"
-          element={
-            <PrivateRoute>
-              <TrackShipmentPage />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </Router>
+          <Route
+            path="/track"
+            element={
+              <PrivateRoute>
+                <TrackShipmentPage />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

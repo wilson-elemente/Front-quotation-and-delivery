@@ -3,6 +3,7 @@ import { TextField, Button, Container, Typography, Paper, Box, Alert } from '@mu
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 type FormData = {
     email: string;
     password: string;
@@ -12,12 +13,14 @@ export default function LoginPage() {
     const { register, handleSubmit } = useForm<FormData>();
     const navigate = useNavigate();
     const [error, setError] = useState('');
+    const { login: authLogin } = useAuth();
 
     const onSubmit = async (data: FormData) => {
         try {
             setError('');
             const response = await login(data.email, data.password);
             localStorage.setItem('token', response.token);
+            authLogin(); // Actualizar el contexto de autenticación
             navigate('/dashboard');
         } catch (error) {
             console.error('Login failed:', error);

@@ -3,6 +3,7 @@ import { TextField, Button, Container, Typography, Paper, Box, Alert } from '@mu
 import { register as registerUser } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 type FormData = {
   email: string;
