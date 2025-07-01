@@ -1,7 +1,8 @@
 import { useForm } from 'react-hook-form';
-import { TextField, Button, Container, Typography } from '@mui/material';
+import { TextField, Button, Container, Typography, Paper, Box, Alert } from '@mui/material';
 import { register as registerUser } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 type FormData = {
   email: string;
@@ -11,6 +12,7 @@ type FormData = {
 export default function RegisterPage() {
   const { register, handleSubmit } = useForm<FormData>();
   const navigate = useNavigate();
+  const [error, setError] = useState('');
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -18,34 +20,54 @@ export default function RegisterPage() {
       alert('Registro exitoso. Ahora puedes iniciar sesión.');
       navigate('/');
     } catch (error) {
-      alert('Error al registrar. El usuario ya puede existe.');
+      setError('Error al registrar. El usuario ya existe o la conexión falló.');
       console.error(error);
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>
-        Registro
+    <Container maxWidth="xs" sx={{ mt: 8 }}>
+      <Typography variant="h4" align="center" gutterBottom>
+        🎆 Crear Cuenta
       </Typography>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <TextField
-          label="Email"
-          fullWidth
-          margin="normal"
-          {...register('email', { required: true })}
-        />
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          {...register('password', { required: true })}
-        />
-        <Button type="submit" variant="contained" color="primary">
-          Registrar
-        </Button>
-      </form>
+
+      <Paper sx={{ p: 4, backgroundColor: '#fafafa' }} elevation={4}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <TextField
+            label="📧 Correo Electrónico"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            sx={{ backgroundColor: 'white' }}
+            {...register('email', { required: true })}
+            error={!!error}
+          />
+          <TextField
+            label="🔑 Contraseña"
+            type="password"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            sx={{ backgroundColor: 'white' }}
+            {...register('password', { required: true })}
+          />
+          <Button 
+            type="submit" 
+            variant="contained" 
+            fullWidth 
+            sx={{ 
+              mt: 2, 
+              py: 1.5,
+              backgroundColor: '#4caf50',
+              '&:hover': { backgroundColor: '#45a049' }
+            }}
+          >
+            ✨ Crear Cuenta
+          </Button>
+        </Box>
+
+        {error && <Alert severity="error" sx={{ mt: 2 }}>❌ {error}</Alert>}
+      </Paper>
     </Container>
   );
 }
