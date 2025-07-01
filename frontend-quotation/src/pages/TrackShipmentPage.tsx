@@ -159,9 +159,9 @@ export default function TrackShipmentPage() {
                                             Ruta del envío
                                         </Typography>
                                         <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center' }}>
-                                            📍 {shipmentData.origin || shipmentData.originAddress || 'Origen no especificado'} 
+                                            📍 {shipmentData.origin || 'Origen no especificado'} 
                                             <span style={{ margin: '0 8px' }}>→</span> 
-                                            📍 {shipmentData.destination || shipmentData.destinationAddress || 'Destino no especificado'}
+                                            📍 {shipmentData.destination || 'Destino no especificado'}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={4}>
@@ -169,7 +169,7 @@ export default function TrackShipmentPage() {
                                             Peso
                                         </Typography>
                                         <Typography variant="body1">
-                                            ⚖️ {shipmentData.weightKg || shipmentData.weight || 'N/A'} kg
+                                            ⚖️ {shipmentData.weightKg ? `${shipmentData.weightKg} kg` : 'N/A'}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={4}>
@@ -177,9 +177,9 @@ export default function TrackShipmentPage() {
                                             Dimensiones
                                         </Typography>
                                         <Typography variant="body1">
-                                            📏 {shipmentData.length && shipmentData.width && shipmentData.height 
-                                                ? `${shipmentData.length}×${shipmentData.width}×${shipmentData.height} cm`
-                                                : shipmentData.dimensions || 'N/A'
+                                            📏 {shipmentData.lengthCm && shipmentData.widthCm && shipmentData.heightCm 
+                                                ? `${shipmentData.lengthCm}×${shipmentData.widthCm}×${shipmentData.heightCm} cm`
+                                                : 'N/A'
                                             }
                                         </Typography>
                                     </Grid>
@@ -190,7 +190,7 @@ export default function TrackShipmentPage() {
                                         <Typography variant="body1" fontWeight="bold" color="success.main">
                                             💰 S/ {shipmentData.quotedPriceCents 
                                                 ? (shipmentData.quotedPriceCents / 100).toFixed(2)
-                                                : shipmentData.price || 'N/A'
+                                                : 'N/A'
                                             }
                                         </Typography>
                                     </Grid>
