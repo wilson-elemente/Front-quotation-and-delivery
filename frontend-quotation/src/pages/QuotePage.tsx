@@ -5,7 +5,11 @@ import {
     Typography,
 
 } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { registerShipment } from '../services/shipmentService';
+import type { RegisterShipmentDTO } from '../types';
+
+import { useForm, } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Grid from '@mui/material/Grid';
@@ -22,6 +26,7 @@ type FormData = {
     widthCm: number;
     heightCm: number;
 };
+
 
 const schema = yup.object().shape({
     origin: yup.string().required('Origen requerido'),
@@ -58,19 +63,44 @@ export default function QuotePage() {
     const {
         register,
         handleSubmit,
+        getValues,
         formState: { errors },
     } = useForm<FormData>({
         resolver: yupResolver(schema),
     });
 
+
+
+    const [quote, setQuote] = useState<QuoteResponseDTO | null>(null);
+
     const onSubmit = async (data: FormData) => {
         try {
             const res: QuoteResponseDTO = await getQuote(data);
-            const priceSoles = (res.priceCents / 100).toFixed(2);
-            alert(`Precio de la cotización: S/ ${priceSoles}`);
+            const priceSoles = res.priceCents
+            setQuote(res);
+            alert(`Precio de la cotización:= ${priceSoles} Pesos Colombianos`);
         } catch (err) {
             console.error(err);
             alert('Error al obtener la cotización');
+        }
+    };
+
+    const handleConfirmShipment = async () => {
+        if (!quote) return;
+
+        const formValues = getValues(); // 
+
+        const payload: RegisterShipmentDTO = {
+            ...formValues,
+            quotedPriceCents: quote.priceCents,
+        };
+        try {
+            const response = await registerShipment(payload);
+            alert(`Envío registrado con ID: ${response.id}`);
+            // Aquí podrías redirigir o limpiar el formulario
+        } catch (error) {
+            console.error(error);
+            alert('Error al registrar el envío');
         }
     };
 
@@ -156,6 +186,17 @@ export default function QuotePage() {
                 >
                     Siguiente
                 </Button>
+
+                {quote && (
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        sx={{ mt: 2, ml: 2 }}
+                        onClick={handleConfirmShipment}
+                    >
+                        Confirmar envío
+                    </Button>
+                )}
             </form>
         </Container>
     );
