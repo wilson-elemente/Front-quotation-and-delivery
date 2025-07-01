@@ -11,6 +11,12 @@ import {
     Step,
     StepLabel,
     Alert,
+    Paper,
+    Grid,
+    Box,
+    Card,
+    CardContent,
+    Divider,
 } from '@mui/material';
 import { getShipmentStatusHistory } from '../services/statusService';
 import { useEffect, useRef } from 'react';
@@ -20,6 +26,8 @@ export default function TrackShipmentPage() {
     const [shipmentId, setShipmentId] = useState('');
     const [statusHistory, setStatusHistory] = useState<string[]>([]);
     const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+    const [hasQueried, setHasQueried] = useState(false);
+    const [shipmentData, setShipmentData] = useState<any>(null);
     const socketRef = useRef<Socket | null>(null);
     const steps = ['En espera', 'En tránsito', 'Entregado'];
 
@@ -57,11 +65,23 @@ export default function TrackShipmentPage() {
             setError('');
             setStatusHistory([]);
             setCurrentStatus(null);
+            setShipmentData(null);
+            setHasQueried(true);
 
-            const history = await getShipmentStatusHistory(shipmentId);
-            setStatusHistory(history);
-            setCurrentStatus(history[history.length - 1] ?? null);
+            const response = await getShipmentStatusHistory(shipmentId);
+            console.log('Respuesta del servicio:', response);
+            
+            // Extraer currentStatus del objeto de respuesta
+            const currentState = response.currentStatus || response.status || null;
+            const history = response.statusHistory || response.history || (Array.isArray(response) ? response : []);
+            
+            setStatusHistory(Array.isArray(history) ? history : []);
+            setCurrentStatus(currentState);
+            setShipmentData(response); // Guardamos todos los datos del envío
+            
             console.log('Buscando estado para ID:', shipmentId);
+            console.log('Estado actual extraído:', currentState);
+            console.log('Datos del envío:', response);
         } catch (err) {
             console.error(err);
             setError('No se pudo obtener el estado del envío');
@@ -69,54 +89,180 @@ export default function TrackShipmentPage() {
     };
 
     return (
-        <Container maxWidth="sm">
-            <Typography variant="h4" gutterBottom>
+        <Container maxWidth="md" sx={{ mt: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom>
                 Seguimiento de envío
             </Typography>
 
-            <TextField
-                label="ID de envío"
-                fullWidth
-                margin="normal"
-                value={shipmentId}
-                onChange={(e) => setShipmentId(e.target.value)}
-            />
+            <Paper sx={{ p: 4, mb: 4, backgroundColor: '#fafafa' }}>
+                {/* Formulario de consulta */}
+                <Box component="form" onSubmit={(e) => { e.preventDefault(); handleTrack(); }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="ID de envío"
+                                value={shipmentId}
+                                onChange={(e) => setShipmentId(e.target.value)}
+                                variant="outlined"
+                                sx={{ backgroundColor: 'white' }}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                onClick={handleTrack}
+                                sx={{ 
+                                    py: 1.5,
+                                    backgroundColor: '#1976d2',
+                                    '&:hover': { backgroundColor: '#1565c0' }
+                                }}
+                            >
+                                Consultar envío
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Box>
 
-            <Button variant="contained" color="primary" onClick={handleTrack}>
-                Consultar
-            </Button>
-            {currentStatus && (
-                <Stepper activeStep={steps.indexOf(currentStatus)} alternativeLabel sx={{ mt: 4 }}>
-                    {steps.map((label) => (
-                        <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
-            )}
+                {/* Información del envío */}
+                {shipmentData && (
+                    <Box sx={{ mt: 4 }}>
+                        <Divider sx={{ mb: 3 }} />
+                        <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
+                            📦 Detalles del envío
+                        </Typography>
+                        <Card sx={{ mb: 3, backgroundColor: 'white', boxShadow: 1 }}>
+                            <CardContent>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            ID del envío
+                                        </Typography>
+                                        <Typography variant="body1" fontWeight="bold">
+                                            {shipmentData.id || shipmentId}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Fecha de creación
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            {shipmentData.createdAt 
+                                                ? new Date(shipmentData.createdAt).toLocaleString('es-ES')
+                                                : 'No disponible'
+                                            }
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Ruta del envío
+                                        </Typography>
+                                        <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center' }}>
+                                            📍 {shipmentData.origin || shipmentData.originAddress || 'Origen no especificado'} 
+                                            <span style={{ margin: '0 8px' }}>→</span> 
+                                            📍 {shipmentData.destination || shipmentData.destinationAddress || 'Destino no especificado'}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Peso
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            ⚖️ {shipmentData.weightKg || shipmentData.weight || 'N/A'} kg
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Dimensiones
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            📏 {shipmentData.length && shipmentData.width && shipmentData.height 
+                                                ? `${shipmentData.length}×${shipmentData.width}×${shipmentData.height} cm`
+                                                : shipmentData.dimensions || 'N/A'
+                                            }
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Precio cotizado
+                                        </Typography>
+                                        <Typography variant="body1" fontWeight="bold" color="success.main">
+                                            💰 S/ {shipmentData.quotedPriceCents 
+                                                ? (shipmentData.quotedPriceCents / 100).toFixed(2)
+                                                : shipmentData.price || 'N/A'
+                                            }
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
+                    </Box>
+                )}
 
-            {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                {/* Estado actual y Stepper */}
+                {hasQueried && (
+                    <Box sx={{ mt: 3 }}>
+                        <Alert severity="info" sx={{ mb: 3 }}>
+                            {currentStatus 
+                                ? `📋 Estado actual: ${currentStatus}` 
+                                : '⏳ Consultando estado del envío... Estado actual: Desconocido'
+                            }
+                        </Alert>
 
-            {currentStatus && (
-                <Alert severity="info" sx={{ mt: 2 }}>
-                    Estado actual: {currentStatus}
-                </Alert>
-            )}
+                        <Stepper 
+                            activeStep={currentStatus ? steps.indexOf(currentStatus) : -1} 
+                            alternativeLabel 
+                            sx={{ 
+                                mt: 2,
+                                '& .MuiStepLabel-root .Mui-completed': {
+                                    color: '#4caf50',
+                                },
+                                '& .MuiStepLabel-root .Mui-active': {
+                                    color: '#1976d2',
+                                }
+                            }}
+                        >
+                            {steps.map((label) => (
+                                <Step key={label}>
+                                    <StepLabel>{label}</StepLabel>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    </Box>
+                )}
 
-            {statusHistory.length > 0 && (
-                <>
-                    <Typography variant="h6" sx={{ mt: 4 }}>
-                        Historial de estados:
-                    </Typography>
-                    <List>
-                        {statusHistory.map((status, index) => (
-                            <ListItem key={index}>
-                                <ListItemText primary={status} />
-                            </ListItem>
-                        ))}
-                    </List>
-                </>
-            )}
+                {/* Historial de estados */}
+                {statusHistory.length > 0 && (
+                    <Box sx={{ mt: 4 }}>
+                        <Divider sx={{ mb: 2 }} />
+                        <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
+                            📅 Historial de estados
+                        </Typography>
+                        <Card sx={{ backgroundColor: 'white', boxShadow: 1 }}>
+                            <CardContent>
+                                <List>
+                                    {statusHistory.map((status, index) => (
+                                        <ListItem key={index} divider={index < statusHistory.length - 1}>
+                                            <ListItemText 
+                                                primary={status}
+                                                secondary={`Actualización ${index + 1}`}
+                                            />
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            </CardContent>
+                        </Card>
+                    </Box>
+                )}
+
+                {/* Error */}
+                {error && (
+                    <Alert severity="error" sx={{ mt: 3 }}>
+                        ❌ {error}
+                    </Alert>
+                )}
+            </Paper>
         </Container>
     );
 }
